@@ -1,0 +1,42 @@
+# 忽略测试文件和目录
+test/
+tests/
+spec/
+*.test.js
+*.spec.js
+
+# 忽略构建工具的配置文件
+*.config.js
+*.config.ts
+
+# 忽略本地开发工具和环境文件
+.env
+*.local
+*.log
+
+# 忽略版本控制系统的文件
+.git/
+.gitignore
+
+# 忽略文档和示例
+README.md
+docs/
+examples/
+*.md
+
+# 忽略编译结果和中间文件
+dist/
+build/
+coverage/
+*.map
+*.tmp
+*.swp
+
+# 忽略其他不需要的文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# 忽略VS Code配置文件夹
+.vscode/
