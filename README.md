@@ -1,36 +1,39 @@
-# eslint插件模板
+# eslint-plugin
 
-## 使用
+## 概述
 
-发布后, 在需要使用的项目安装, 然后配置文件:
+一些自己写的eslint插件
 
-```JavaScript
-module.exports = {
-  plugins: [<插件名称>],
+## 安装
 
-  overrides: [
-    {
-      files: [<作用的文件>],
+1. **安装包**
+
+    ```
+    npm i @lsby/eslint-plugin
+    ```
+
+2. **安装 ESLint**
+
+    确保你的项目中已安装 ESLint 和 TypeScript ESLint 解析器。如果尚未安装，可以使用以下命令进行安装：
+
+    ```
+    npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+    ```
+
+3. **配置 ESLint**
+
+    在你的 ESLint 配置文件中引入并启用规则：
+
+    ```javascript
+    module.exports = {
+      parser: '@typescript-eslint/parser',
+      plugins: ['@typescript-eslint'],
+      extends: [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended'
+      ],
       rules: {
-        '插件名称': 'error',
+        '@lsby/no-broken-link': 'error',
       },
-    },
-  ],
-}
-// 其中, `插件名称`不带前缀`eslint-plugin`
-// 但如果插件发布在个人空间下, 例如`@lsby/my-plugin`, 则不用考虑前缀
-```
-
-## 调试
-
-可以将这个包打包:
-
-```
-npm pack
-```
-
-然后解压并复制到其他项目的`node_modules`文件夹中
-
-> 注意, 如果发布在个人空间下, 文件夹的结构应该是`@名字/插件名`
-
-同样按上面的方法引入, 即可生效
+    };
+    ```

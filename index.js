@@ -1,5 +1,5 @@
 module.exports = {
   rules: {
-    'no-console': require('./lib/rules/no-console'),
+    'no-broken-link': require('./lib/rules/no-broken-link'),
   },
 }

@@ -1,7 +1,6 @@
 {
-  "name": "eslint-plugin-my-plugin",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@lsby/eslint-plugin",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "pub:public": "bumpp && npm publish --access public",
