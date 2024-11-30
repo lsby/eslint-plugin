@@ -34,6 +34,7 @@
       ],
       rules: {
         '@lsby/no-broken-link': 'error',
+        '@lsby/prefer-let': 'error',
       },
     };
     ```
