@@ -5,5 +5,6 @@ module.exports = {
     'no-negation': require('./lib/rules/no-negation'),
     'no-null': require('./lib/rules/no-null'),
     'require-has-check': require('./lib/rules/require-has-check'),
+    'no-definite-assignment-assertion': require('./lib/rules/no-definite-assignment-assertion'),
   },
 }
