@@ -1,8 +1,9 @@
-// 禁止 else（当条件是等于或不等于时）
-// 对于等于/不等于的条件判断，else 表示"除当前条件外的所有可能"
-// 当状态集合未来扩展到多于2个时, else部分会默默吃掉新增状态却无任何提示
-// 这很容易造成意外的状态遗漏
-// 应当使用提早返回 或 switch + 穷尽检查
+// 禁止对于等于/不等于条件的 else 处理多种状态
+// 因为对于这些条件，else 表示"除给定状态外的所有可能"
+// 对于状态小于等于两个的条件, else 只会兜底一种情况, 这是正确的
+// 但如果状态继续增加, else 兜底必然匹配一个以上种状态
+// 此时 else 部分会默默吃掉新增状态却无任何提示, 这很容易造成意外的状态逻辑遗漏
+// 这种情况下应当使用提早返回 或 switch + 穷尽检查
 
 import * as ts from 'typescript'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
@@ -10,11 +11,11 @@ import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 const rule: TSESLint.RuleModule<'noElse', []> = {
   meta: {
     type: 'problem',
-    docs: { description: '当条件是等于或不等于时，禁止使用 else 分支，防止隐含的状态遗漏' },
-    messages: {
-      noElse:
-        '禁止在等于/不等于条件下使用 else 分支。当条件状态扩展到多于2个时, else部分会默默吃掉新增状态却无任何提示。请改用提前返回(early return)或 switch 语句',
+    docs: {
+      description:
+        '禁止对等于/不等于条件使用 else。当新增状态时，else 会隐匿地处理新状态，容易造成状态逻辑遗漏。应使用提早返回或 switch + 穷尽检查替代。',
     },
+    messages: { noElse: '禁止在等于/不等于条件中使用 else，请使用提早返回或 switch 语句进行穷尽检查。' },
     schema: [],
   },
   defaultOptions: [],
@@ -29,12 +30,22 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
       // 先检查联合类型，因为它可能包含其他标志
       if ((type.flags & ts.TypeFlags.Union) !== 0) {
         const union = type as ts.UnionType
-        return union.types.length
+        // Count distinct types in union
+        let count = 0
+        for (const t of union.types) {
+          count += countLiteralVariants(t)
+        }
+        return count
       }
 
       // 布尔类型有 2 个值：true 和 false
       if ((type.flags & ts.TypeFlags.Boolean) !== 0) {
         return 2
+      }
+
+      // 布尔字面量类型（true 或 false）
+      if ((type.flags & ts.TypeFlags.BooleanLiteral) !== 0) {
+        return 1
       }
 
       // null 类型（1 个值）
@@ -48,10 +59,7 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
       }
 
       // 字面量类型
-      if (
-        (type.flags & (ts.TypeFlags.StringLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.BooleanLiteral)) !==
-        0
-      ) {
+      if ((type.flags & (ts.TypeFlags.StringLiteral | ts.TypeFlags.NumberLiteral)) !== 0) {
         return 1
       }
 
