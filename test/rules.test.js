@@ -1,71 +1,24 @@
 const { RuleTester } = require('eslint')
 const plugin = require('../dist/index.js')
+const path = require('path')
 
-// 为不需要类型信息的规则进行测试
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
   parserOptions: { ecmaVersion: 2020, sourceType: 'module', ecmaFeatures: { jsx: true } },
 })
 
+const typeAwareRuleTester = new RuleTester({
+  parser: require.resolve('@typescript-eslint/parser'),
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
+    ecmaFeatures: { jsx: true },
+    tsconfigRootDir: path.resolve(__dirname, 'fixtures'),
+    project: './tsconfig.json',
+  },
+})
+
 describe('ESLint Plugin Rules', () => {
-  describe('prefer-let', () => {
-    ruleTester.run('prefer-let', plugin.rules['prefer-let'], {
-      valid: [
-        'let x = 1',
-        'let y = 2',
-        'let z = { a: 1 }',
-        'let arr = []',
-        { code: 'declare const unique: unique symbol', options: [] },
-      ],
-      invalid: [
-        { code: 'const x = 1', errors: [{ messageId: 'preferLet' }], output: 'let x = 1' },
-        { code: 'var y = 2', errors: [{ messageId: 'preferLet' }], output: 'let y = 2' },
-        { code: 'const obj = { a: 1 }', errors: [{ messageId: 'preferLet' }], output: 'let obj = { a: 1 }' },
-        { code: 'var arr = []', errors: [{ messageId: 'preferLet' }], output: 'let arr = []' },
-      ],
-    })
-  })
-
-  describe('no-else', () => {
-    ruleTester.run('no-else', plugin.rules['no-else'], {
-      valid: [
-        `
-        if (x === 200) {
-          return 'success'
-        }
-        return 'error'
-        `,
-        `
-        if (x > 10) {
-          console.log('greater')
-        }
-        `,
-      ],
-      invalid: [
-        {
-          code: `
-          if (x === 200) {
-            return 'success'
-          } else {
-            return 'error'
-          }
-          `,
-          errors: [{ messageId: 'noElse' }],
-        },
-        {
-          code: `
-          if (code > 0) {
-            console.log('positive')
-          } else {
-            console.log('non-positive')
-          }
-          `,
-          errors: [{ messageId: 'noElse' }],
-        },
-      ],
-    })
-  })
-
   describe('no-definite-assignment-assertion', () => {
     ruleTester.run('no-definite-assignment-assertion', plugin.rules['no-definite-assignment-assertion'], {
       valid: [
@@ -101,6 +54,84 @@ describe('ESLint Plugin Rules', () => {
           }
           `,
           errors: [{ messageId: 'noDefiniteAssignment' }, { messageId: 'noDefiniteAssignment' }],
+        },
+      ],
+    })
+  })
+
+  describe('no-else-on-equality', () => {
+    ruleTester.run('no-else-on-equality', plugin.rules['no-else-on-equality'], {
+      valid: [
+        `
+        if (x === 200) {
+          return 'success'
+        }
+        return 'error'
+        `,
+        `
+        if (x > 10) {
+          console.log('greater')
+        } else {
+          console.log('not greater')
+        }
+        `,
+        `
+        if (x !== 'admin') {
+          return 'not admin'
+        }
+        return 'admin'
+        `,
+      ],
+      invalid: [
+        {
+          code: `
+          if (x === 200) {
+            return 'success'
+          } else {
+            return 'error'
+          }
+          `,
+          errors: [{ messageId: 'noElse' }],
+        },
+        {
+          code: `
+          if (code !== 'success') {
+            console.log('not success')
+          } else {
+            console.log('success')
+          }
+          `,
+          errors: [{ messageId: 'noElse' }],
+        },
+      ],
+    })
+  })
+
+  describe('no-negation', () => {
+    typeAwareRuleTester.run('no-negation', plugin.rules['no-negation'], {
+      valid: [
+        { code: 'let flag: boolean = true; !flag;', filename: path.resolve(__dirname, 'fixtures', 'valid.ts') },
+        {
+          code: 'function isValid(): boolean { return true; } !isValid();',
+          filename: path.resolve(__dirname, 'fixtures', 'valid.ts'),
+        },
+        { code: 'let value: true = true; !value;', filename: path.resolve(__dirname, 'fixtures', 'valid.ts') },
+      ],
+      invalid: [
+        {
+          code: 'let count: number = 5; !count;',
+          filename: path.resolve(__dirname, 'fixtures', 'invalid.ts'),
+          errors: [{ messageId: 'noNegationOnNonBoolean' }],
+        },
+        {
+          code: 'let name: string = "test"; !name;',
+          filename: path.resolve(__dirname, 'fixtures', 'invalid.ts'),
+          errors: [{ messageId: 'noNegationOnNonBoolean' }],
+        },
+        {
+          code: 'let obj: object = {}; !obj;',
+          filename: path.resolve(__dirname, 'fixtures', 'invalid.ts'),
+          errors: [{ messageId: 'noNegationOnNonBoolean' }],
         },
       ],
     })
@@ -158,6 +189,24 @@ describe('ESLint Plugin Rules', () => {
           `,
           errors: [{ messageId: 'noSwitchDefault' }],
         },
+      ],
+    })
+  })
+
+  describe('prefer-let', () => {
+    ruleTester.run('prefer-let', plugin.rules['prefer-let'], {
+      valid: [
+        'let x = 1',
+        'let y = 2',
+        'let z = { a: 1 }',
+        'let arr = []',
+        { code: 'declare const unique: unique symbol', options: [] },
+      ],
+      invalid: [
+        { code: 'const x = 1', errors: [{ messageId: 'preferLet' }], output: 'let x = 1' },
+        { code: 'var y = 2', errors: [{ messageId: 'preferLet' }], output: 'let y = 2' },
+        { code: 'const obj = { a: 1 }', errors: [{ messageId: 'preferLet' }], output: 'let obj = { a: 1 }' },
+        { code: 'var arr = []', errors: [{ messageId: 'preferLet' }], output: 'let arr = []' },
       ],
     })
   })
