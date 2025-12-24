@@ -193,6 +193,82 @@ describe('ESLint Plugin Rules', () => {
     })
   })
 
+  describe('no-early-return-on-equality', () => {
+    ruleTester.run('no-early-return-on-equality', plugin.rules['no-early-return-on-equality'], {
+      valid: [
+        `
+        if (x !== 200) {
+          return 'not success'
+        }
+        console.log('success')
+        `,
+        `
+        if (x !== 'admin') {
+          return 'not admin'
+        }
+        handleAdmin()
+        `,
+        `
+        if (x !== code) {
+          throw new Error('invalid code')
+        }
+        processCode()
+        `,
+        `
+        if (x > 10) {
+          return 'greater'
+        }
+        `,
+        `
+        if (x === 200) {
+          console.log('success')
+        }
+        `,
+        `
+        if (x === 'active') {
+          doSomething()
+        } else {
+          doOtherThing()
+        }
+        `,
+      ],
+      invalid: [
+        {
+          code: `
+          if (x === 200) {
+            return 'success'
+          }
+          `,
+          errors: [{ messageId: 'noEarlyReturnOnEquality' }],
+        },
+        {
+          code: `
+          if (status == 'active') {
+            return true
+          }
+          `,
+          errors: [{ messageId: 'noEarlyReturnOnEquality' }],
+        },
+        {
+          code: `
+          if (code === 'ERROR') {
+            throw new Error('invalid code')
+          }
+          `,
+          errors: [{ messageId: 'noEarlyReturnOnEquality' }],
+        },
+        {
+          code: `
+          if (x === 1 || y === 2) {
+            return false
+          }
+          `,
+          errors: [{ messageId: 'noEarlyReturnOnEquality' }],
+        },
+      ],
+    })
+  })
+
   describe('prefer-let', () => {
     ruleTester.run('prefer-let', plugin.rules['prefer-let'], {
       valid: [
