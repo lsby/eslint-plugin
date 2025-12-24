@@ -20,7 +20,7 @@ import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 const rule: TSESLint.RuleModule<'preferLet', []> = {
   meta: {
     type: 'suggestion',
-    docs: { description: '禁止使用 const 和 var，仅允许使用 let 声明变量' },
+    docs: { description: '禁止使用 const 和 var, 仅允许使用 let 声明变量' },
     fixable: 'code',
     messages: { preferLet: '使用 let 代替 {kind}' },
     schema: [],
