@@ -1,5 +1,5 @@
 // 禁止对于等于/不等于条件的 else 处理多种状态
-// 因为对于这些条件，else 表示"除给定状态外的所有可能"
+// 因为对于这些条件, else 表示"除给定状态外的所有可能"
 // 对于状态小于等于两个的条件, else 只会兜底一种情况, 这是正确的
 // 但如果状态继续增加, else 兜底必然匹配一个以上种状态
 // 此时 else 部分会默默吃掉新增状态却无任何提示, 这很容易造成意外的状态逻辑遗漏
@@ -13,11 +13,11 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
     type: 'problem',
     docs: {
       description:
-        '禁止在非二值状态的等于/不等于条件中使用 else。当状态扩张时，else 会隐匿地处理新状态，容易造成状态逻辑遗漏。',
+        '禁止在非二值状态的等于/不等于条件中使用 else. 当状态扩张时, else 会隐匿地处理新状态, 容易造成状态逻辑遗漏. ',
     },
     messages: {
       noElse:
-        '禁止在非二值状态的等于/不等于条件中使用 else。若逻辑本质为二值状态，请先通过辅助变量表示为布尔值；若为多状态逻辑，请使用提早返回(early return)或 switch 穷尽。',
+        '禁止在非二值状态的等于/不等于条件中使用 else. 若状态在语义上是二值的(例如"是否为空"), 请先通过辅助变量表示为布尔值；若为多状态逻辑, 请使用提早返回(early return)或 switch 穷尽. ',
     },
 
     schema: [],
@@ -31,7 +31,7 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
      * 计算类型中的字面量值个数
      */
     function countLiteralVariants(type: ts.Type): number {
-      // 先检查联合类型，因为它可能包含其他标志
+      // 先检查联合类型, 因为它可能包含其他标志
       if ((type.flags & ts.TypeFlags.Union) !== 0) {
         const union = type as ts.UnionType
         // Count distinct types in union
@@ -72,7 +72,7 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
     }
 
     /**
-     * 检查条件中是否包含等于或不等于操作符，以及被比较的值
+     * 检查条件中是否包含等于或不等于操作符, 以及被比较的值
      * 返回 [operand1, operand2] 或 null
      */
     function getEqualityOperands(node: TSESTree.Expression): [TSESTree.Expression, TSESTree.Expression] | null {
@@ -93,11 +93,11 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
 
     /**
      * 检查是否应该允许 else（状态数 ≤ 2）
-     * 返回 true 表示允许 else，false 表示不允许
+     * 返回 true 表示允许 else, false 表示不允许
      */
     function shouldAllowElse(leftExpr: TSESTree.Expression, rightExpr: TSESTree.Expression): boolean {
       if (!typeChecker || !parserServices?.esTreeNodeToTSNodeMap) {
-        // 无法获取类型信息时，按原始规则：不允许 else
+        // 无法获取类型信息时, 按原始规则：不允许 else
         return false
       }
 
@@ -107,7 +107,7 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
         const rightNode = parserServices.esTreeNodeToTSNodeMap.get(rightExpr)
 
         if (!leftNode || !rightNode) {
-          // 无法映射节点时，按原始规则：不允许 else
+          // 无法映射节点时, 按原始规则：不允许 else
           return false
         }
 
@@ -115,7 +115,7 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
         let leftType = typeChecker.getTypeAtLocation(leftNode)
         let rightType = typeChecker.getTypeAtLocation(rightNode)
 
-        // 对于标识符，尝试获取声明的类型
+        // 对于标识符, 尝试获取声明的类型
         if (leftExpr.type === 'Identifier') {
           const leftSymbol = typeChecker.getSymbolAtLocation(leftNode)
           if (leftSymbol && leftSymbol.valueDeclaration) {
@@ -133,20 +133,20 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
         const leftCount = countLiteralVariants(leftType)
         const rightCount = countLiteralVariants(rightType)
 
-        // 只有当两边都是有限的且都 ≤ 2 个状态时，才允许 else
+        // 只有当两边都是有限的且都 ≤ 2 个状态时, 才允许 else
         const bothFinite = isFinite(leftCount) && isFinite(rightCount)
         const allow = bothFinite && leftCount <= 2 && rightCount <= 2
 
         return allow
       } catch {
-        // 如果出错，按原始规则：不允许 else
+        // 如果出错, 按原始规则：不允许 else
         return false
       }
     }
 
     return {
       IfStatement(node: TSESTree.IfStatement) {
-        // 仅在 if 条件是等于或不等于的情况下，禁止 else
+        // 仅在 if 条件是等于或不等于的情况下, 禁止 else
         if (node.alternate !== null) {
           const operands = getEqualityOperands(node.test)
           if (operands) {
