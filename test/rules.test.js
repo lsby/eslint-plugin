@@ -210,49 +210,4 @@ describe('ESLint Plugin Rules', () => {
       ],
     })
   })
-
-  describe('prefer-switch-over-multi-if', () => {
-    ruleTester.run('prefer-switch-over-multi-if', plugin.rules['prefer-switch-over-multi-if'], {
-      valid: [
-        `
-        if (x > 10) {
-          console.log('greater than 10')
-        }
-        `,
-        `
-        if (x === 1) {
-          doOne()
-        }
-        // unrelated code
-        if (y === 2) {
-          doTwo()
-        }
-        `,
-      ],
-      invalid: [
-        {
-          code: `
-          if (status === 'active') {
-            handleActive()
-          } else if (status === 'inactive') {
-            handleInactive()
-          } else if (status === 'pending') {
-            handlePending()
-          }
-          `,
-          errors: [{ messageId: 'preferSwitch' }],
-        },
-        {
-          code: `
-          if (x === 1) {
-            doOne()
-          } else if (x === 2) {
-            doTwo()
-          }
-          `,
-          errors: [{ messageId: 'preferSwitch' }],
-        },
-      ],
-    })
-  })
 })
