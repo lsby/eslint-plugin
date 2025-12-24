@@ -3,7 +3,7 @@
 // 对于状态小于等于两个的条件, else 只会兜底一种情况, 这是正确的
 // 但如果状态继续增加, else 兜底必然匹配一个以上种状态
 // 此时 else 部分会默默吃掉新增状态却无任何提示, 这很容易造成意外的状态逻辑遗漏
-// 这种情况下应当使用提早返回 或 switch + 穷尽检查
+// 这种情况下应当使用提早返回(early return)或 switch 穷尽
 
 import * as ts from 'typescript'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
@@ -13,9 +13,13 @@ const rule: TSESLint.RuleModule<'noElse', []> = {
     type: 'problem',
     docs: {
       description:
-        '禁止对等于/不等于条件使用 else。当新增状态时，else 会隐匿地处理新状态，容易造成状态逻辑遗漏。应使用提早返回或 switch + 穷尽检查替代。',
+        '禁止在非二值状态的等于/不等于条件中使用 else。当状态扩张时，else 会隐匿地处理新状态，容易造成状态逻辑遗漏。',
     },
-    messages: { noElse: '禁止在等于/不等于条件中使用 else，请使用提早返回或 switch 语句进行穷尽检查。' },
+    messages: {
+      noElse:
+        '禁止在非二值状态的等于/不等于条件中使用 else。若逻辑本质为二值状态，请先通过辅助变量表示为布尔值；若为多状态逻辑，请使用提早返回(early return)或 switch 穷尽。',
+    },
+
     schema: [],
   },
   defaultOptions: [],
