@@ -16,141 +16,154 @@ const typeAwareRuleTester = new RuleTester({
 describe('prefer-switch-for-literal-enum', () => {
   typeAwareRuleTester.run('prefer-switch-for-literal-enum', plugin.rules['prefer-switch-for-literal-enum'], {
     valid: [
-      // 没有 else 的 if 判断允许
+      // switch 语句是好的
       {
         code: `
-        if (x === 200) {
-          return 'success'
-        }
-        return 'error'
-        `,
-        filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
-      },
-      // 不是等于/不等于的判断允许
-      {
-        code: `
-        if (x > 10) {
-          console.log('greater')
-        } else {
-          console.log('not greater')
+        type Status = 'active' | 'inactive'
+        const status: Status = 'active'
+        switch (status) {
+          case 'active':
+            handleActive()
+            break
+          case 'inactive':
+            handleInactive()
+            break
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
       },
-      // 与 null 比较允许
+      // 没有 else 分支的 if 语句
       {
         code: `
-        let value: string | null = null
-        if (value === null) {
-          console.log('null')
-        } else {
-          console.log('not null')
+        type Status = 'active' | 'inactive'
+        const status: Status = 'active'
+        if (status === 'active') {
+          handleActive()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
       },
-      // 与 undefined 比较允许
+      // 非字面量联合类型的变量
       {
         code: `
-        let value: string | undefined = undefined
-        if (value === undefined) {
-          console.log('undefined')
+        const count: number = 10
+        if (count > 10) {
+          // ...
         } else {
-          console.log('defined')
+          // ...
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
       },
-      // 布尔值允许
+      // 字符串类型（不是字面量联合）
       {
         code: `
-        let flag: boolean = true
-        if (flag === true) {
-          console.log('true')
+        const name: string = 'john'
+        if (name === 'john') {
+          // ...
         } else {
-          console.log('false')
+          // ...
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
       },
-      // 普通的变量比较允许（不是字面量枚举）
+      // if-else if 没有最终 else
       {
         code: `
-        let x: number = 200
-        if (x === 200) {
-          return 'success'
+        type Status = 'active' | 'inactive' | 'pending'
+        const status: Status = 'active'
+        if (status === 'active') {
+          handleActive()
+        } else if (status === 'inactive') {
+          handleInactive()
+        }
+        `,
+        filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
+      },
+      // 布尔类型
+      {
+        code: `
+        const flag: boolean = true
+        if (flag) {
+          // ...
         } else {
-          return 'error'
+          // ...
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'valid.ts'),
       },
     ],
     invalid: [
-      // 对字符串字面量枚举的 if-else 不允许
+      // 字符串字面量联合类型
       {
         code: `
-        let status: 'good' | 'bad' = 'good'
-        if (status === 'good') {
-          console.log('good')
+        type Status = 'active' | 'inactive'
+        const status: Status = 'active'
+        if (status === 'active') {
+          handleActive()
         } else {
-          console.log('bad')
+          handleOther()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'invalid.ts'),
-        errors: [{ messageId: 'useSwitchForEnumLiteral' }],
+        errors: [{ messageId: 'preferSwitch' }],
       },
-      // 3 个以上的字符串字面量枚举不允许
+      // 数字字面量联合类型
       {
         code: `
-        let type: 'a' | 'b' | 'c' = 'a'
-        if (type === 'a') {
-          console.log('a')
+        type Code = 200 | 404 | 500
+        const code: Code = 200
+        if (code === 200) {
+          success()
         } else {
-          console.log('not a')
+          fail()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'invalid.ts'),
-        errors: [{ messageId: 'useSwitchForEnumLiteral' }],
+        errors: [{ messageId: 'preferSwitch' }],
       },
-      // 数字字面量枚举不允许
+      // 布尔字面量联合类型
       {
         code: `
-        let code: 1 | 2 = 1
-        if (code === 1) {
-          console.log('one')
+        type Flag = true | false
+        const flag: Flag = true
+        if (flag === true) {
+          handleTrue()
         } else {
-          console.log('two')
+          handleFalse()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'invalid.ts'),
-        errors: [{ messageId: 'useSwitchForEnumLiteral' }],
+        errors: [{ messageId: 'preferSwitch' }],
       },
-      // 反向写法也不允许
+      // else if 最后跟 else
       {
         code: `
-        let status: 'active' | 'inactive' = 'active'
-        if ('active' === status) {
-          console.log('active')
+        type Status = 'active' | 'inactive' | 'pending'
+        const status: Status = 'active'
+        if (status === 'active') {
+          handleActive()
+        } else if (status === 'inactive') {
+          handleInactive()
         } else {
-          console.log('inactive')
+          handlePending()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'invalid.ts'),
-        errors: [{ messageId: 'useSwitchForEnumLiteral' }],
+        errors: [{ messageId: 'preferSwitch' }],
       },
-      // 不等于操作符也不允许
+      // 单个字面量类型（也是字面量联合的一种）
       {
         code: `
-        let code: 'success' | 'error' = 'success'
-        if (code !== 'success') {
-          console.log('not success')
+        const status: 'active' = 'active'
+        if (status === 'active') {
+          handleActive()
         } else {
-          console.log('success')
+          handleOther()
         }
         `,
         filename: path.resolve(__dirname, '../fixtures', 'invalid.ts'),
-        errors: [{ messageId: 'useSwitchForEnumLiteral' }],
+        errors: [{ messageId: 'preferSwitch' }],
       },
     ],
   })
