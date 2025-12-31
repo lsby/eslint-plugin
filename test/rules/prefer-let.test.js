@@ -16,10 +16,10 @@ describe('prefer-let', () => {
       { code: 'declare const unique: unique symbol', options: [] },
     ],
     invalid: [
-      { code: 'const x = 1', errors: [{ messageId: 'preferLet' }], output: 'let x = 1' },
-      { code: 'var y = 2', errors: [{ messageId: 'preferLet' }], output: 'let y = 2' },
-      { code: 'const obj = { a: 1 }', errors: [{ messageId: 'preferLet' }], output: 'let obj = { a: 1 }' },
-      { code: 'var arr = []', errors: [{ messageId: 'preferLet' }], output: 'let arr = []' },
+      { code: 'const x = 1', errors: [{ message: /使用 let 代替 const/ }], output: 'let x = 1' },
+      { code: 'var y = 2', errors: [{ message: /使用 let 代替 var/ }], output: 'let y = 2' },
+      { code: 'const obj = { a: 1 }', errors: [{ message: /使用 let 代替 const/ }], output: 'let obj = { a: 1 }' },
+      { code: 'var arr = []', errors: [{ message: /使用 let 代替 var/ }], output: 'let arr = []' },
     ],
   })
 })

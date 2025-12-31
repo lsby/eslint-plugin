@@ -7,7 +7,7 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: { description: '禁止在 JSDoc 注解中使用未定义的 {@link} 引用' },
-    messages: { undefinedLink: '{@link} 中的标识符 "{identifier}" 未定义' },
+    messages: { undefinedLink: '{@link} 中的标识符 "{{identifier}}" 未定义' },
     schema: [],
   },
   create(context: Rule.RuleContext) {
