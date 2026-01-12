@@ -1,15 +1,12 @@
 const { RuleTester } = require('eslint')
 const plugin = require('../../dist/index.js')
 const path = require('path')
+const tsParser = require('@typescript-eslint/parser')
 
 const typeAwareRuleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-    ecmaFeatures: { jsx: true },
-    tsconfigRootDir: path.resolve(__dirname, '../fixtures'),
-    project: './tsconfig.json',
+  languageOptions: {
+    parser: tsParser,
+    parserOptions: { ecmaVersion: 2020, sourceType: 'module', ecmaFeatures: { jsx: true }, project: true },
   },
 })
 

@@ -30,8 +30,10 @@ const rule: TSESLint.RuleModule<'preferSwitch', []> = {
           const { left, right } = node.test
 
           // 使用 TypeScript 类型检查器检查类型
-          const parserServices = context.parserServices
-          if (!parserServices || !parserServices.program) return
+          const parserServices =
+            (context.parserServices as ParserServicesWithTypeInformation) ||
+            (context.sourceCode?.parserServices as ParserServicesWithTypeInformation)
+          if (!parserServices || !parserServices.program || !parserServices.esTreeNodeToTSNodeMap) return
 
           const typeChecker: ts.TypeChecker = parserServices.program.getTypeChecker()
 

@@ -1,22 +1,23 @@
 // 禁止对非布尔值使用 "!" 运算符, 否则可能导致意外的类型强制转换
 
-import type { Rule } from 'eslint'
 import ts from 'typescript'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 
-const rule: Rule.RuleModule = {
+const rule: TSESLint.RuleModule<'noNegationOnNonBoolean', []> = {
   meta: {
     type: 'problem',
     docs: { description: '禁止对非布尔值使用逻辑取反操作符 (!)' },
     messages: { noNegationOnNonBoolean: '禁止对非布尔值使用 "!" 运算符' },
     schema: [],
   },
-  create(context: Rule.RuleContext) {
+  defaultOptions: [],
+  create(context: TSESLint.RuleContext<'noNegationOnNonBoolean', []>) {
     return {
-      UnaryExpression(node) {
+      UnaryExpression(node: TSESTree.UnaryExpression) {
         if (node.operator !== '!') return
 
-        const parserServices = context.parserServices
-        if (!parserServices) return
+        const parserServices = context.sourceCode?.parserServices || context.parserServices
+        if (!parserServices || !parserServices.program || !parserServices.esTreeNodeToTSNodeMap) return
 
         const typeChecker: ts.TypeChecker = parserServices.program.getTypeChecker()
         const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node.argument)

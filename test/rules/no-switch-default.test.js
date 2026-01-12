@@ -1,9 +1,12 @@
 const { RuleTester } = require('eslint')
 const plugin = require('../../dist/index.js')
+const tsParser = require('@typescript-eslint/parser')
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: { ecmaVersion: 2020, sourceType: 'module', ecmaFeatures: { jsx: true } },
+  languageOptions: {
+    parser: tsParser,
+    parserOptions: { ecmaVersion: 2020, sourceType: 'module', ecmaFeatures: { jsx: true } },
+  },
 })
 
 describe('no-switch-default', () => {

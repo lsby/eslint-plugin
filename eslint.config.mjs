@@ -7,7 +7,7 @@ export default [
     files: ['test/**/*.ts'],
     languageOptions: {
       parser: tsParser,
-      parserOptions: { ecmaVersion: 2024, sourceType: 'module', project: './tsconfig.json' },
+      parserOptions: { ecmaVersion: 2024, sourceType: 'module', projectService: true },
     },
     plugins: { lsby: plugin },
     rules: {
